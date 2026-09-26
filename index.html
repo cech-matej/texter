@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Texter - Draw with Words</title>
+    <meta name="description" content="A creative tool that allows you to draw with words.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link href="css/style.css" rel="stylesheet" type="text/css" />
+
+    <!-- JS -->
+    <script type="text/javascript" src="js/libs/dat.gui.min.js"></script>
+    <script type="text/javascript" src="js/texter.js"></script>
+  </head>
+
+  <style>
+    .dg .string input[type="text"] {
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+    .dg.main {
+      max-width: 100vw !important;
+    }
+  </style>
+
+  <body>
+    <!-- Header -->
+    <div id="info-tab">
+      <div class="info first">
+        <b>Texter</b> is a little javascript experiment that lets you explore
+        your creativity by drawing with words. This app is an extension of a
+        demo from this <a href="http://generative-gestaltung.de/">book</a>
+        <p>
+          Made by: <a href="http://tholman.com"> Tim Holman </a> -
+          <a
+            href="http://twitter.com/twholman"
+            title="You'll love my tweets, I promise ;)"
+          >
+            @twholman
+          </a><br>
+          Updated by: Bc. Petr Novák
+        </p>
+      </div>
+      <div class="info">
+        This has been made using <i> Javascript </i> and the HTML5
+        <i> canvas </i> element. You can find the source on
+        <a href="http://github.com/tholman/texter">Github</a>. If you feel like supporting me, you can always <a href="https://ko-fi.com/tholman" target="_blank">buy me a coffee</a>.
+        <p>
+          <a
+            href="https://twitter.com/share"
+            class="twitter-share-button"
+            data-url="http://tholman.com/texter"
+            data-text="Texter - Draw pictures with text! - by @twholman -"
+          >
+            Tweet
+          </a>
+          <iframe
+            src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Ftholman.com%2Fexperiments%2Fhtml5%2Ftexter&amp;send=false&amp;layout=button_count&amp;width=450&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21"
+            scrolling="no"
+            frameborder="0"
+            style="
+              border: none;
+              overflow: hidden;
+              width: 107px;
+              height: 21px;
+              margin-bottom: -1px;
+            "
+            allowTransparency="true"
+          ></iframe>
+        </p>
+      </div>
+      <div id="title">Texter</div>
+    </div>
+    <div id="back">
+      <a href="https://tholman.com/experiments"> More experiments </a> <span>&lsaquo;</span>
+    </div>
+    <script type="text/javascript" src="js/header.js"></script>
+
+    <!-- APP -->
+    <canvas id="canvas"></canvas>
+    <script>
+      var texter = new Texter();
+      texter.initialize();
+
+      var gui = new dat.GUI();
+      gui
+        .add(texter, "text")
+        .name("Text")
+        .onChange(function () {
+          texter.onTextChange();
+        });
+      gui.add(texter, "minFontSize", 3, 100).name("Minimum Size");
+      gui.add(texter, "maxFontSize", 3, 400).name("Maximum Size");
+      gui.add(texter, "angleDistortion", 0, 2).step(0.1).name("Random Angle");
+      
+      var colorController = gui.addColor(texter, "textColor").name("Text Color").listen().onChange(function (value) {
+        texter.applyNewColor(value);
+      });
+
+      var pickerIcon = document.createElement('span');
+      pickerIcon.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: text-bottom; margin-left: 25%;"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/></svg>';
+      pickerIcon.style.cursor = 'pointer';
+      pickerIcon.title = 'Kapátko (lze i držením klávesy Alt)';
+
+      pickerIcon.onclick = function() {
+        texter.pickColorMode = true;
+        pickerIcon.style.color = '#1ed36f';
+      };
+
+      colorController.__li.querySelector('.property-name').appendChild(pickerIcon);
+
+      texter.onColorPicked = function() {
+        pickerIcon.style.color = '';
+      };
+
+      gui
+        .addColor(texter, "bgColor")
+        .name("Background Color")
+        .onChange(function (value) {
+          texter.setBackground(value);
+        });
+        
+      gui.add(texter, "clear").name("Clear");
+      gui.add(texter, "importImage").name("Import");
+      gui.add(texter, "save").name("Save");
+    </script>
+  </body>
+</html>
