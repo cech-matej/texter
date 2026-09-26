@@ -207,20 +207,104 @@ function Texter() {
   };
 
   var pickColorFromCanvas = function (x, y) {
-    var pixel = context.getImageData(x - window.pageXOffset, y - window.pageYOffset, 1, 1).data;
-    var hex;
-    
-    if (pixel[3] === 0) {
-      hex = _this.bgColor;
-    } else {
-      var r = pixel[0], g = pixel[1], b = pixel[2];
-      hex = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    var px = Math.floor(x - window.pageXOffset);
+    var py = Math.floor(y - window.pageYOffset);
+
+    var pixel = null;
+
+    /*
+    * If a background image exists, check whether the clicked
+    * position is inside the displayed image.
+    */
+    if (_this.backgroundImage) {
+      var img = _this.backgroundImage;
+
+      var width = img.width * _this.backgroundImageSize;
+      var height = img.height * _this.backgroundImageSize;
+
+      var imageX = (backgroundImageCanvas.width - width) / 2;
+      var imageY = (backgroundImageCanvas.height - height) / 2;
+
+      var insideImage =
+        px >= imageX &&
+        px < imageX + width &&
+        py >= imageY &&
+        py < imageY + height;
+
+      if (insideImage) {
+        /*
+        * Convert canvas coordinates back to the original
+        * image coordinates.
+        */
+        var imagePixelX = Math.floor(
+          (px - imageX) / _this.backgroundImageSize
+        );
+
+        var imagePixelY = Math.floor(
+          (py - imageY) / _this.backgroundImageSize
+        );
+
+        /*
+        * Read directly from the original image.
+        *
+        * This completely ignores backgroundImageOpacity.
+        */
+        var tempCanvas = document.createElement("canvas");
+        tempCanvas.width = 1;
+        tempCanvas.height = 1;
+
+        var tempContext = tempCanvas.getContext("2d");
+
+        tempContext.drawImage(
+          img,
+          imagePixelX,
+          imagePixelY,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1
+        );
+
+        pixel = tempContext.getImageData(0, 0, 1, 1).data;
+      }
     }
-    
+
+    /*
+    * If we didn't pick from the background image,
+    * pick from the drawing canvas.
+    */
+    if (!pixel) {
+      pixel = context.getImageData(px, py, 1, 1).data;
+    }
+
+    var hex;
+
+    if (pixel[3] === 0) {
+      hex = _this.bgColor === "transparent"
+        ? "#ffffff"
+        : _this.bgColor;
+    } else {
+      var r = pixel[0];
+      var g = pixel[1];
+      var b = pixel[2];
+
+      hex =
+        "#" +
+        ((1 << 24) + (r << 16) + (g << 8) + b)
+          .toString(16)
+          .slice(1);
+    }
+
     _this.applyNewColor(hex);
+
     _this.pickColorMode = false;
-    if (magnifierCanvas) magnifierCanvas.style.display = 'none';
-    
+
+    if (magnifierCanvas) {
+      magnifierCanvas.style.display = "none";
+    }
+
     if (typeof _this.onColorPicked === "function") {
       _this.onColorPicked();
     }
@@ -295,12 +379,32 @@ function Texter() {
     magCtx.fillRect(0, 0, magSize, magSize);
     magCtx.imageSmoothingEnabled = false;
 
+    if (backgroundImageCanvas) {
+      // Background/reference image
+      magCtx.drawImage(
+        backgroundImageCanvas,
+        pageX - window.scrollX - srcSize / 2,
+        pageY - window.scrollY - srcSize / 2,
+        srcSize,
+        srcSize,
+        0,
+        0,
+        magSize,
+        magSize
+      );
+    }
+
+    // Drawing/text layer on top
     magCtx.drawImage(
       canvas,
       pageX - window.scrollX - srcSize / 2,
       pageY - window.scrollY - srcSize / 2,
-      srcSize, srcSize,
-      0, 0, magSize, magSize
+      srcSize,
+      srcSize,
+      0,
+      0,
+      magSize,
+      magSize
     );
 
     magCtx.strokeStyle = 'red';
