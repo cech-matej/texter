@@ -63,14 +63,14 @@ function Texter() {
     context.fillStyle = _this.textColor;
   };
 
-  var undo = function () {
+  this.undo = function () {
     if (historyStep > 0) {
       historyStep--;
       restoreState();
     }
   };
 
-  var redo = function () {
+  this.redo = function () {
     if (historyStep < history.length - 1) {
       historyStep++;
       restoreState();
@@ -123,10 +123,10 @@ function Texter() {
       if (e.ctrlKey || e.metaKey) { // Podporuje Windows (Ctrl) i Mac (Cmd)
         if (e.key === "z" || e.key === "Z") {
           e.preventDefault();
-          undo();
+          _this.undo();
         } else if (e.key === "y" || e.key === "Y") {
           e.preventDefault();
-          redo();
+          _this.redo();
         }
       }
     });
