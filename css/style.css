@@ -198,3 +198,49 @@ canvas {
 #info-tab iframe {
     vertical-align: bottom;
 }
+
+#history-controls {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+
+  display: flex;
+  gap: 8px;
+
+  z-index: 10001;
+
+  user-select: none;
+}
+
+#history-controls button {
+  width: 48px;
+  height: 48px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.92);
+  color: #222;
+
+  font-size: 28px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.25);
+
+  transition:
+    background 0.15s,
+    transform 0.1s,
+    opacity 0.15s;
+}
+
+#history-controls button:hover {
+  background: #1ed36f;
+  color: white;
+}
+
+#history-controls button:active {
+  transform: scale(0.92);
+}

@@ -82,9 +82,21 @@
       <canvas id="background-image-canvas"></canvas>
       <canvas id="canvas"></canvas>
     </div>
+    <div id="history-controls">
+      <button id="undo-button" title="Undo (Ctrl+Z)">↶</button>
+      <button id="redo-button" title="Redo (Ctrl+Y)">↷</button>
+    </div>
     <script>
       var texter = new Texter();
       texter.initialize();
+
+      document.getElementById("undo-button").addEventListener("click", function () {
+        texter.undo();
+      });
+
+      document.getElementById("redo-button").addEventListener("click", function () {
+        texter.redo();
+      });
 
       var gui = new dat.GUI();
       gui
@@ -148,8 +160,8 @@
       gui.add(texter, "importImage").name("Import");
       gui.add(texter, "save").name("Save");
 
-      gui.add(texter, "undo").name("↶ Undo");
-      gui.add(texter, "redo").name("↷ Redo");
+      // gui.add(texter, "undo").name("↶ Undo");
+      // gui.add(texter, "redo").name("↷ Redo");
     </script>
   </body>
 </html>
