@@ -11,6 +11,29 @@ canvas {
   -webkit-user-select: none;
 }
 
+#canvas-container {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+#background-image-canvas,
+#canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#background-image-canvas {
+  z-index: 0;
+  pointer-events: none;
+}
+
+#canvas {
+  z-index: 1;
+}
+
 /* ----- INFO & SHARING -----  */
 
 #back {

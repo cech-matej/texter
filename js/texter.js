@@ -42,6 +42,13 @@ function Texter() {
   bgCanvas = null;
   bgContext = null;
 
+  var backgroundImageCanvas = null;
+  var backgroundImageContext = null;
+
+  this.backgroundImage = null;
+  this.backgroundImageOpacity = 0.2;
+  this.backgroundImageSize = 1.0;
+
   var saveState = function () {
     if (historyStep < history.length - 1) {
       history.length = historyStep + 1;
@@ -82,6 +89,12 @@ function Texter() {
     context = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
+    backgroundImageCanvas = document.getElementById("background-image-canvas");
+    backgroundImageContext = backgroundImageCanvas.getContext("2d");
+
+    backgroundImageCanvas.width = window.innerWidth;
+    backgroundImageCanvas.height = window.innerHeight;
 
     canvas.addEventListener("mousedown", onDown, false);
     canvas.addEventListener("touchstart", onDown, false);
@@ -333,7 +346,12 @@ function Texter() {
 
   this.setBackground = function (value) {
     _this.bgColor = value;
-    canvas.style.backgroundColor = value;
+
+    // Keep the drawing canvas itself transparent.
+    canvas.style.backgroundColor = "transparent";
+
+    // Update the background layer.
+    drawBackgroundImage();
   };
 
   this.onTextChange = function () {
@@ -536,5 +554,102 @@ function Texter() {
       importImgCtx.putImageData(imgData, 0, 0);
       drawPreview();
     };
+  };
+
+  var drawBackgroundImage = function () {
+    if (!backgroundImageCanvas || !backgroundImageContext) return;
+
+    backgroundImageContext.clearRect(
+      0,
+      0,
+      backgroundImageCanvas.width,
+      backgroundImageCanvas.height
+    );
+
+    // Draw background color if one exists.
+    if (_this.bgColor && _this.bgColor !== "transparent") {
+      backgroundImageContext.fillStyle = _this.bgColor;
+      backgroundImageContext.fillRect(
+        0,
+        0,
+        backgroundImageCanvas.width,
+        backgroundImageCanvas.height
+      );
+    }
+
+    // Draw reference image.
+    if (!_this.backgroundImage) return;
+
+    var img = _this.backgroundImage;
+
+    var width = img.width * _this.backgroundImageSize;
+    var height = img.height * _this.backgroundImageSize;
+
+    var x = (backgroundImageCanvas.width - width) / 2;
+    var y = (backgroundImageCanvas.height - height) / 2;
+
+    backgroundImageContext.save();
+
+    backgroundImageContext.globalAlpha = _this.backgroundImageOpacity;
+
+    backgroundImageContext.drawImage(
+      img,
+      x,
+      y,
+      width,
+      height
+    );
+
+    backgroundImageContext.restore();
+  };
+
+  this.addBackgroundImage = function () {
+    var input = document.createElement("input");
+
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = function (event) {
+      var file = event.target.files[0];
+
+      if (!file) return;
+
+      var reader = new FileReader();
+
+      reader.onload = function (e) {
+        var img = new Image();
+
+        img.onload = function () {
+          _this.backgroundImage = img;
+
+          drawBackgroundImage();
+        };
+
+        img.src = e.target.result;
+      };
+
+      reader.readAsDataURL(file);
+    };
+
+    input.click();
+  };
+
+  this.updateBackgroundImage = function () {
+    drawBackgroundImage();
+  };
+
+  this.transparentBackground = function () {
+    _this.bgColor = "transparent";
+
+    drawBackgroundImage();
+
+    // Update the color controller in dat.GUI.
+    if (typeof gui !== "undefined") {
+      gui.__controllers.forEach(function (controller) {
+        if (controller.property === "bgColor") {
+          controller.updateDisplay();
+        }
+      });
+    }
   };
 }
